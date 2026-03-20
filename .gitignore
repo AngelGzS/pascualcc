@@ -1,0 +1,59 @@
+# ─── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Virtual environment ───────────────────────────────────────────────────
+.venv/
+venv/
+ENV/
+
+# ─── Data (parquet, csv, market data) ──────────────────────────────────────
+data/raw/*.parquet
+data/raw/*.csv
+data/processed/
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# ─── Logs ──────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── Environment / Secrets ─────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── IDE / Editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Testing / Cache ──────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Optuna ────────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+optuna_studies/
+
+# ─── Claude Code ───────────────────────────────────────────────────────────
+.claude/
