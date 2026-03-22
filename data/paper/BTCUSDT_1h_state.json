@@ -1,0 +1,77 @@
+{
+  "pair": "BTCUSDT",
+  "timeframe": "1h",
+  "capital": 500.0,
+  "initial_capital": 500.0,
+  "start_time": 1773980546370,
+  "candles_processed": 13,
+  "positions": [],
+  "trades": [],
+  "equity_curve": [
+    {
+      "timestamp": 1773979200000,
+      "capital": 500.0,
+      "price": 70783.69
+    },
+    {
+      "timestamp": 1773982800000,
+      "capital": 500.0,
+      "price": 70606.24
+    },
+    {
+      "timestamp": 1773986400000,
+      "capital": 500.0,
+      "price": 70502.9
+    },
+    {
+      "timestamp": 1773990000000,
+      "capital": 500.0,
+      "price": 70854.66
+    },
+    {
+      "timestamp": 1773993600000,
+      "capital": 500.0,
+      "price": 71042.23
+    },
+    {
+      "timestamp": 1773997200000,
+      "capital": 500.0,
+      "price": 70583.8
+    },
+    {
+      "timestamp": 1774000800000,
+      "capital": 500.0,
+      "price": 70611.68
+    },
+    {
+      "timestamp": 1774004400000,
+      "capital": 500.0,
+      "price": 70478.71
+    },
+    {
+      "timestamp": 1774008000000,
+      "capital": 500.0,
+      "price": 70342.63
+    },
+    {
+      "timestamp": 1774011600000,
+      "capital": 500.0,
+      "price": 69863.84
+    },
+    {
+      "timestamp": 1774022400000,
+      "capital": 500.0,
+      "price": 69829.26
+    },
+    {
+      "timestamp": 1774062000000,
+      "capital": 500.0,
+      "price": 70657.35
+    },
+    {
+      "timestamp": 1774065600000,
+      "capital": 500.0,
+      "price": 70642.13
+    }
+  ]
+}

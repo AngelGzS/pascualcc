@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  paper-trading:
+    build: .
+    container_name: pascualcc-paper
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - paper_state:/app/data/paper
+      - paper_logs:/app/logs
+    environment:
+      # Trading config
+      - PAIRS=BTCUSDT
+      - CAPITAL=10000
+      - RISK=0.02
+      - RR_TARGET=2.5
+      - STRATEGY=orb
+      - PORT=8080
+      - LOG_LEVEL=INFO
+      # Binance (read-only, for price data)
+      - BINANCE_API_KEY=${BINANCE_API_KEY:-}
+      - BINANCE_API_SECRET=${BINANCE_API_SECRET:-}
+
+volumes:
+  paper_state:
+  paper_logs:
