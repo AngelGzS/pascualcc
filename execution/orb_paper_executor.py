@@ -133,12 +133,13 @@ class ORBPaperExecutor:
 
     async def _on_candle_close(self, candle: dict) -> None:
         """Called on every 15m candle close."""
-        ts = int(candle["t"])
-        o = float(candle["o"])
-        h = float(candle["h"])
-        l = float(candle["l"])
-        c = float(candle["c"])
-        v = float(candle["v"])
+        # Support both WebSocket format (t,o,h,l,c,v) and REST/poller format (timestamp,open,high,low,close,volume)
+        ts = int(candle.get("t") or candle.get("timestamp") or candle.get("time", 0))
+        o = float(candle.get("o") or candle.get("open", 0))
+        h = float(candle.get("h") or candle.get("high", 0))
+        l = float(candle.get("l") or candle.get("low", 0))
+        c = float(candle.get("c") or candle.get("close", 0))
+        v = float(candle.get("v") or candle.get("volume", 0))
 
         # Append to buffer
         new_row = {"timestamp": ts, "open": o, "high": h, "low": l, "close": c, "volume": v}
