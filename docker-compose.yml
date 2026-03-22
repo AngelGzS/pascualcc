@@ -17,11 +17,16 @@ services:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_EXTRA_ARGS=--exit-node=${TS_EXIT_NODE} --accept-dns=false
       - TS_USERSPACE=false
+      - TS_STATE_DIR=/var/lib/tailscale
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
     healthcheck:
-      test: ["CMD", "tailscale", "status"]
-      interval: 30s
+      test: ["CMD-SHELL", "tailscale status | grep -q 'offers exit node'"]
+      interval: 15s
       timeout: 10s
-      retries: 3
+      retries: 10
+      start_period: 30s
 
   paper-trading:
     build: .
