@@ -72,8 +72,13 @@ class BingXKlinePoller:
             r = requests.get(url, params=params, timeout=10)
             r.raise_for_status()
             data = r.json()
-            if data.get("data"):
-                return data["data"]
+            result = data.get("data")
+            if result:
+                if self._last_candle_ts == 0:
+                    logger.info("[Poller] First response: %d items, type=%s, sample=%s",
+                                len(result), type(result[0]).__name__ if result else "?",
+                                str(result[0])[:200] if result else "?")
+                return result
         except Exception as e:
             logger.warning("[Poller] REST error: %s", e)
         return None
@@ -104,11 +109,25 @@ class BingXKlinePoller:
                 )
 
                 if candles:
+                    # Handle case where data might be wrapped differently
+                    if isinstance(candles, str):
+                        logger.warning("[Poller] Got string instead of list, skipping")
+                        await asyncio.sleep(self.poll_interval)
+                        continue
+
+                    # Ensure we have dicts
+                    if candles and not isinstance(candles[0], dict):
+                        logger.warning("[Poller] Unexpected candle format: %s", type(candles[0]))
+                        await asyncio.sleep(self.poll_interval)
+                        continue
+
                     # BingX returns newest first, we want oldest first
-                    candles.sort(key=lambda x: int(x["time"]))
+                    candles.sort(key=lambda x: int(x.get("time", 0)))
 
                     for raw in candles:
-                        ts = int(raw["time"])
+                        ts = int(raw.get("time", 0))
+                        if ts == 0:
+                            continue
                         # Only process candles we haven't seen
                         if ts > self._last_candle_ts:
                             # Check if this candle is closed
@@ -128,7 +147,7 @@ class BingXKlinePoller:
                                     )
 
             except Exception as e:
-                logger.error("[Poller] Error: %s", e)
+                logger.error("[Poller] Error: %s (%s)", e, type(e).__name__, exc_info=True)
 
             await asyncio.sleep(self.poll_interval)
 
