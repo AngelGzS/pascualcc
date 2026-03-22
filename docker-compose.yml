@@ -10,9 +10,12 @@ services:
     volumes:
       - ts_state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_EXTRA_ARGS=--exit-node=${TS_EXIT_NODE}
+      - TS_EXTRA_ARGS=--exit-node=${TS_EXIT_NODE} --accept-dns=false
       - TS_USERSPACE=false
     healthcheck:
       test: ["CMD", "tailscale", "status"]
