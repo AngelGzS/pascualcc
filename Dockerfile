@@ -13,7 +13,7 @@ COPY . .
 RUN mkdir -p data/paper logs
 
 # Expose web dashboard
-EXPOSE 8080
+EXPOSE 8082
 
 # Health check
 HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
