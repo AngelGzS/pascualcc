@@ -1,17 +1,37 @@
-version: "3.8"
-
 services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: pascualcc-ts
+    hostname: pascualcc-trading
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - ts_state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_EXTRA_ARGS=--exit-node=${TS_EXIT_NODE}
+      - TS_USERSPACE=false
+    healthcheck:
+      test: ["CMD", "tailscale", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   paper-trading:
     build: .
     container_name: pascualcc-paper
     restart: unless-stopped
-    ports:
-      - "8082:8082"
+    network_mode: service:tailscale
+    depends_on:
+      tailscale:
+        condition: service_healthy
     volumes:
       - paper_state:/app/data/paper
       - paper_logs:/app/logs
     environment:
-      # Trading config
       - PAIRS=BTCUSDT
       - CAPITAL=10000
       - RISK=0.02
@@ -23,3 +43,4 @@ services:
 volumes:
   paper_state:
   paper_logs:
+  ts_state:
