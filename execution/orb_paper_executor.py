@@ -22,6 +22,7 @@ import pandas as pd
 from config import settings
 from data.fetcher import BinanceFetcher, BingXFetcher
 from data.websocket import BinanceKlineWS, BingXKlineWS
+from data.kline_poller import BingXKlinePoller
 from paper.state import save_state, load_state
 from strategies.intraday.session_utils import to_est
 
@@ -99,11 +100,21 @@ class ORBPaperExecutor:
                 on_candle=self._on_candle_close,
             )
         else:
-            ws = BingXKlineWS(
-                pair=self.pair,
-                timeframe="15m",
-                on_candle=self._on_candle_close,
-            )
+            # Try WebSocket first, fall back to REST poller
+            use_poller = os.environ.get("BINGX_USE_POLLER", "false").lower() == "true"
+            if use_poller:
+                logger.info("Using REST API poller (WS disabled via BINGX_USE_POLLER)")
+                ws = BingXKlinePoller(
+                    pair=self.pair,
+                    timeframe="15m",
+                    on_candle=self._on_candle_close,
+                )
+            else:
+                ws = BingXKlineWS(
+                    pair=self.pair,
+                    timeframe="15m",
+                    on_candle=self._on_candle_close,
+                )
 
         loop = asyncio.get_event_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
