@@ -1,6 +1,6 @@
 """ORB (Opening Range Breakout) live paper trading executor.
 
-Connects to Binance WebSocket for live 15m candles.
+Connects to BingX or Binance WebSocket for live 15m candles (controlled by PRICE_SOURCE env var).
 Generates ORB signals at NY session open window.
 Manages trades with fixed risk sizing.
 Persists state to JSON for crash recovery.
@@ -20,8 +20,8 @@ from typing import Any
 import pandas as pd
 
 from config import settings
-from data.fetcher import BinanceFetcher
-from data.websocket import BinanceKlineWS
+from data.fetcher import BinanceFetcher, BingXFetcher
+from data.websocket import BinanceKlineWS, BingXKlineWS
 from paper.state import save_state, load_state
 from strategies.intraday.session_utils import to_est
 
@@ -81,8 +81,9 @@ class ORBPaperExecutor:
     # ─── Main loop ──────────────────────────────────────────────────────────
 
     async def start(self) -> None:
-        logger.info("Starting ORB paper trading: %s (capital=$%.0f, risk=%.0f%%, RR=%.1f, strategy=%s)",
-                     self.pair, self.initial_capital, self.risk_per_trade * 100, self.rr_target, self.strategy)
+        source = settings.PRICE_SOURCE
+        logger.info("Starting ORB paper trading: %s (capital=$%.0f, risk=%.0f%%, RR=%.1f, strategy=%s, source=%s)",
+                     self.pair, self.initial_capital, self.risk_per_trade * 100, self.rr_target, self.strategy, source)
 
         await self._load_warmup()
 
@@ -91,11 +92,18 @@ class ORBPaperExecutor:
 
         self._print_status()
 
-        ws = BinanceKlineWS(
-            pair=self.pair,
-            timeframe="15m",
-            on_candle=self._on_candle_close,
-        )
+        if source == "binance":
+            ws = BinanceKlineWS(
+                pair=self.pair,
+                timeframe="15m",
+                on_candle=self._on_candle_close,
+            )
+        else:
+            ws = BingXKlineWS(
+                pair=self.pair,
+                timeframe="15m",
+                on_candle=self._on_candle_close,
+            )
 
         loop = asyncio.get_event_loop()
         for sig in (signal.SIGINT, signal.SIGTERM):
@@ -347,8 +355,12 @@ class ORBPaperExecutor:
     # ─── Data loading ───────────────────────────────────────────────────
 
     async def _load_warmup(self) -> None:
-        logger.info("Loading warmup data...")
-        fetcher = BinanceFetcher()
+        source = settings.PRICE_SOURCE
+        logger.info("Loading warmup data from %s...", source)
+        if source == "binance":
+            fetcher = BinanceFetcher()
+        else:
+            fetcher = BingXFetcher()
         end_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
         start_ms = end_ms - int(BUFFER_SIZE * 15 * 60 * 1000)
 
@@ -357,10 +369,10 @@ class ORBPaperExecutor:
             start_ms=start_ms, end_ms=end_ms,
         )
         if df.empty:
-            logger.error("Failed to load warmup data!")
+            logger.error("Failed to load warmup data from %s!", source)
             return
         self.df = df.tail(BUFFER_SIZE).reset_index(drop=True)
-        logger.info("Loaded %d warmup candles", len(self.df))
+        logger.info("Loaded %d warmup candles from %s", len(self.df), source)
 
     # ─── Display ────────────────────────────────────────────────────────
 
@@ -451,7 +463,7 @@ class ORBPaperExecutor:
 
     # ─── Shutdown ───────────────────────────────────────────────────────
 
-    def _handle_shutdown(self, ws: BinanceKlineWS) -> None:
+    def _handle_shutdown(self, ws: BinanceKlineWS | BingXKlineWS) -> None:
         logger.info("Shutdown requested, saving state...")
         self._shutdown = True
         self._save_state()

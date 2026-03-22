@@ -147,4 +147,9 @@ COPY_STATE_DIR: str = "data/copy"
 BINGX_API_KEY: str = os.environ.get("BINGX_API_KEY", "")
 BINGX_API_SECRET: str = os.environ.get("BINGX_API_SECRET", "")
 BINGX_BASE_URL: str = os.environ.get("BINGX_BASE_URL", "https://open-api.bingx.com")
+BINGX_WS_URL: str = os.environ.get("BINGX_WS_URL", "wss://open-api-ws.bingx.com/swap-market")
 BINGX_MAX_REQUESTS_PER_MINUTE: int = 500
+
+# ─── Price source for paper trading ─────────────────────────────────────
+# "bingx" (default, works globally) or "binance" (may fail on US servers)
+PRICE_SOURCE: str = os.environ.get("PRICE_SOURCE", "bingx").lower()
