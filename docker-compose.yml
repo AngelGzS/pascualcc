@@ -19,9 +19,6 @@ services:
       - STRATEGY=orb
       - PORT=8080
       - LOG_LEVEL=INFO
-      # Binance (read-only, for price data)
-      - BINANCE_API_KEY=${BINANCE_API_KEY:-}
-      - BINANCE_API_SECRET=${BINANCE_API_SECRET:-}
 
 volumes:
   paper_state:
